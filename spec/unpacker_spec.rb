@@ -1,10 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper.rb')
-require "./#{File.dirname(__FILE__)}/../Unpack.rb"
 
 describe Unpack do
   before(:each) do
-    @unpack = Unpack.new()
-    @unpack.prepare('/Users/linus/Documents/Projekt/UndertexterApp/Spec/Data/Rar/')
+    @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'))
+    @unpack.prepare!
   end
   
   it "should work" do
@@ -21,6 +20,10 @@ describe Unpack do
   
   it "should contain a absolut path to the file" do
     @unpack.files.each {|file| file.should match(/^\//)}
+  end
+  
+  it "should have some files with the name 'accessible'" do
+    @unpack.files.reject {|file| ! file.match(/\_accessible\_/) }.count.should > 0
   end
   
   it "should only contain files that exists" do
@@ -40,14 +43,32 @@ describe Unpack do
   
   it "should only contain one rar file for each directory" do
     @unpack.clean!
-    @unpack.should have(2).files
+    @unpack.should have(3).files
   end
   
   it "should not contain any strange files" do
     @unpack.files.each {|file| file.should_not match(/\.strange$/)}
   end
-  
-  it "should be able to unpack" do
-    
+end
+
+describe Unpack, "should work with options" do
+  it "should not return any files when min is set to 0" do
+    @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {depth: 0})
+    @unpack.prepare!
+    @unpack.should have(0).files
   end
+  
+  it "should return subtitles rar files when min files is set to o" do
+    @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {min_files: 0})
+    @unpack.prepare!
+    @unpack.clean!
+    @unpack.files.reject {|file| ! file.match(/\_subtitle\_/) }.count.should > 0
+  end
+  
+  it "should access some really deep files" do
+     @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {depth: 100})
+     @unpack.prepare!
+     @unpack.clean!
+     @unpack.files.reject {|file| ! file.match(/\_not\_/) }.count.should > 0
+   end
 end
