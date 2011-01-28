@@ -11,6 +11,8 @@ class Unpack
       :depth => 2,
       :absolute_path_to_unrar => "#{File.dirname(__FILE__)}/../bin/unrar"
     }
+    
+    @removeable = {}
     @options.merge!(args[:options]) if args[:options]
   end
    
@@ -52,13 +54,28 @@ class Unpack
   
   def unrar(args)
     %x(cd #{args[:path].gsub(/\s+/, '\ ')} && #{@options[:absolute_path_to_unrar]} e -y #{args[:file]})
+    @removeable.merge!(args[:path] => 'rar')
   end
 
   def unzip(args)
     %x(unzip -n #{args[:file]} -d #{args[:path].gsub(/\s+/, '\ ')})
+    @removeable.merge!(args[:path] => 'zip')
   end
   
   def find_file_type(file_type)
     %x{cd #{@directory} && find #{@directory} -type f -maxdepth #{(@options[:depth])} -name \"*.#{file_type}\"}.split(/\n/)
+  end
+  
+  def wipe!
+    @removeable.each do |value|
+      path = value.first
+      type = value.last
+      
+      # Finding every file in this directory
+      Dir.glob(path + '/*').each do |file|
+        # Is the found file as the same type as the one that got unpacked?
+        puts FileUtils.rm(file) if Mimer.identify(file).send(:"#{type}?")
+      end
+    end
   end
 end

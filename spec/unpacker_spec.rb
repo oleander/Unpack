@@ -1,5 +1,12 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper.rb')
 
+# Preparing the file structure 
+{'some_zip_files.zip' => 'zip_real', 'test_package.rar' => 'rar_real'}.each_pair do |taget|
+  src = File.expand_path(File.dirname(__FILE__) + "/data/o_files/#{taget.first}")
+  dest = File.expand_path(File.dirname(__FILE__) + "/data/#{taget.last}/#{taget.first}")
+  FileUtils.copy_file(src, dest)
+end
+
 describe Unpack do
   before(:each) do
     @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'))
@@ -96,17 +103,18 @@ describe Unpack, "should work on real files" do
   before(:all) do
     @path = File.expand_path('spec/data/rar_real')
     @unpack = Unpack.new(directory: @path, options: {min_files: 0})
-  end
-  
-  it "should the unpacked file when running the unpack! command" do
     @unpack.prepare!
     @unpack.clean!
     @unpack.unpack!
-    
+  end
+  
+  it "should the unpacked file when running the unpack! command" do
     %x{cd #{@path} && ls}.split(/\n/).reject {|file| ! file.match(/\_real\_/)}.count.should > 0
   end
   
-  it "should be able to " do
-    
+  it "should be able to remove archive files after unpack" do
+    files = %x{cd #{@path} && ls}.split(/\n/).count
+    @unpack.wipe!
+    %x{cd #{@path} && ls}.split(/\n/).count.should < files
   end
 end
