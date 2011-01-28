@@ -66,9 +66,24 @@ describe Unpack, "should work with options" do
   end
   
   it "should access some really deep files" do
-     @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {depth: 100})
-     @unpack.prepare!
-     @unpack.clean!
-     @unpack.files.reject {|file| ! file.match(/\_not\_/) }.count.should > 0
-   end
+    @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {depth: 100})
+    @unpack.prepare!
+    @unpack.clean!
+    @unpack.files.reject {|file| ! file.match(/\_not\_/) }.count.should > 0
+  end
+end
+
+describe Unpack, "should work on real files" do
+  before(:all) do
+    @path = File.expand_path('spec/data/rar_real')
+    @unpack = Unpack.new(directory: @path, options: {min_files: 0})
+  end
+  
+  it "should the unpacked file when running the unpack! command" do
+    @unpack.prepare!
+    @unpack.clean!
+    @unpack.unpack!
+    
+    %x{cd #{@path} && ls}.split(/\n/).reject {|file| ! file.match(/\_real\_/)}.count.should > 0
+  end
 end

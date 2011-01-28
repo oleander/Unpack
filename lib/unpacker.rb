@@ -29,4 +29,19 @@ class Unpack
     @files.group_by{|file| File.dirname(file) }.each_pair{|_,file| results << file.sort.first }
     @files = results
   end
+  
+  def unpack!
+    @files.each do |file|
+      self.unrar(file)
+    end
+  end
+  
+  def unrar(full_path_to_file)
+    path = File.dirname(full_path_to_file)
+    %x(cd #{path.gsub(/\s+/, '\ ')} && unrar e -y #{full_path_to_file})
+  end
+
+  # def unzip(path, filename)
+  #    %x(unzip -n /tmp/#{filename} -d #{path.gsub(/\s+/, '\ ')})
+  # end
 end
