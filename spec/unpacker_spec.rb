@@ -73,6 +73,19 @@ describe Unpack, "should work with options" do
   end
 end
 
+describe Unpack,"should work with zip files" do
+  before(:all) do
+    @unpack = Unpack.new(directory: File.expand_path('spec/data/zip'), options: {min_files: 1})
+    @unpack.prepare!
+    @unpack.clean!
+  end
+  
+  it "should find some zip files" do
+    @unpack.should have_at_least(1).files
+    @unpack.files.each {|file| file.should match(/\.zip$/) }
+  end
+end
+
 describe Unpack, "should work on real files" do
   before(:all) do
     @path = File.expand_path('spec/data/rar_real')

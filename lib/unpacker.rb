@@ -6,16 +6,21 @@ class Unpack
     
     @options = {
       :min_files => 5,
-      :depth => 2
+      :depth => 2,
+      :absolute_path_to_unrar => "#{File.dirname(__FILE__)}/../bin/unrar"
     }
-    
     @options.merge!(args[:options]) if args[:options]
   end
    
   def prepare!
     @directory.gsub!(/\s+/, '\ ')
-    @files = %x{cd #{@directory} && find #{@directory} -type f -maxdepth #{(@options[:depth])} -name \"*.rar\"}.split(/\n/)
-    @files.map! {|file| File.absolute_path(file)}
+    @files = []
+    
+    ['zip', 'rar'].each do |type|
+      @files << find_file_type(type)
+    end
+    
+    @files.flatten!.map! {|file| File.absolute_path(file)}
   end
   
   def clean!
@@ -31,17 +36,20 @@ class Unpack
   end
   
   def unpack!
-    @files.each do |file|
-      self.unrar(file)
+    @files.each  do |file| 
+      self.unrar(path: File.dirname(file), file: file)
     end
   end
   
-  def unrar(full_path_to_file)
-    path = File.dirname(full_path_to_file)
-    %x(cd #{path.gsub(/\s+/, '\ ')} && unrar e -y #{full_path_to_file})
+  def unrar(args)
+    %x(cd #{args[:path].gsub(/\s+/, '\ ')} && #{@options[:absolute_path_to_unrar]} e -y #{args[:file]})
   end
 
-  # def unzip(path, filename)
-  #    %x(unzip -n /tmp/#{filename} -d #{path.gsub(/\s+/, '\ ')})
-  # end
+  def unzip(full_path_to_file)
+    %x(unzip -n /tmp/#{filename} -d #{path.gsub(/\s+/, '\ ')})
+  end
+  
+  def find_file_type(file_type)
+    %x{cd #{@directory} && find #{@directory} -type f -maxdepth #{(@options[:depth])} -name \"*.#{file_type}\"}.split(/\n/)
+  end
 end
