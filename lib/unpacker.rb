@@ -1,5 +1,5 @@
 require 'mimer_plus'
-
+require 'unpacker/container'
 class Unpack
   attr_accessor :files
   
@@ -42,24 +42,29 @@ class Unpack
   def unpack!
     @files.each  do |file|
       type = Mimer.identify(file)
+      path = File.dirname(file)
+      before = Dir.new(path).entries
+
       if type.zip?
-        self.unzip(path: File.dirname(file), file: file)
+        @removeable.merge!(path => {:file_type => 'zip'})
+        self.unzip(path: path, file: file)
       elsif type.rar?
-        self.unrar(path: File.dirname(file), file: file)
+        @removeable.merge!(path => {:file_type => 'rar'})
+        self.unrar(path: path, file: file)
       else
         puts "Something went wrong, the mime type does not match zip or rar"
       end
+            
+      @removeable[path].merge!(:diff => Dir.new(path).entries - before) if @removeable[path] 
     end
   end
   
   def unrar(args)
     %x(cd #{args[:path].gsub(/\s+/, '\ ')} && #{@options[:absolute_path_to_unrar]} e -y #{args[:file]})
-    @removeable.merge!(args[:path] => 'rar')
   end
 
   def unzip(args)
-    %x(unzip -n #{args[:file]} -d #{args[:path].gsub(/\s+/, '\ ')})
-    @removeable.merge!(args[:path] => 'zip')
+    %x(unzip -n #{args[:file]} -d #{args[:path].gsub(/\s+/, '\ ')})    
   end
   
   def find_file_type(file_type)
@@ -69,13 +74,21 @@ class Unpack
   def wipe!
     @removeable.each do |value|
       path = value.first
-      type = value.last
+      type = value.last[:file_type]
       
       # Finding every file in this directory
       Dir.glob(path + '/*').each do |file|
         # Is the found file as the same type as the one that got unpacked?
         FileUtils.rm(file) if Mimer.identify(file).send(:"#{type}?")
       end
+    end
+  end
+  
+  def diff
+    # The code below this line can only be called once
+    return @removeable if @removeable.first.class == Container or @removeable.first.class == NilClass
+    @removeable = @removeable.map do |value|
+      Container.new(files: value.last[:diff], directory: value.first)
     end
   end
 end

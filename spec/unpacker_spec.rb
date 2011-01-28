@@ -13,6 +13,11 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper.rb')
   FileUtils.copy_file(src, dest)
 end
 
+# Removes old files in the test directory
+Dir.glob(File.expand_path(File.dirname(__FILE__) + "/data/movie_to/*")).each do |file|
+  FileUtils.rm(file) if Mimer.identify(file).text?
+end
+
 describe Unpack do
   before(:each) do
     @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'))
@@ -102,6 +107,32 @@ describe Unpack,"should work with zip files" do
   it "should be able to unpack zip files" do
     @unpack.unpack!
     %x{cd #{@path} && ls}.split(/\n/).reject {|file| ! file.match(/\_real\_/)}.count.should > 0
+  end
+  
+  it "should return a list of new files" do
+    @unpack.should have(1).diff
+  end
+  
+  it "should contain files" do
+    @unpack.diff.first.should have(5).files
+  end
+  
+  it "should have and directory" do
+    @unpack.diff.first.directory.should_not be_nil
+  end
+  
+  it "should only contain directories that is of the sort absolute" do
+    @unpack.diff.first.directory.should match(/^\//)
+  end
+  
+  it "should contain valid files and directories, even if we call it 5 times" do
+    5.times do
+      @unpack.diff.each do |work|
+        work.files.each do |file|
+          File.exists?(file).should be_true
+        end
+      end
+    end
   end
 end
 
