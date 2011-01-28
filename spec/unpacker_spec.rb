@@ -2,6 +2,12 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper.rb')
 
 # Preparing the file structure 
 {'some_zip_files.zip' => 'zip_real', 'test_package.rar' => 'rar_real'}.each_pair do |taget|
+  
+  # Removes old files in the test directory
+  Dir.glob(File.expand_path(File.dirname(__FILE__) + "/data/#{taget.last}/*")).each do |file|
+    FileUtils.rm(file) if Mimer.identify(file).text?
+  end
+  
   src = File.expand_path(File.dirname(__FILE__) + "/data/o_files/#{taget.first}")
   dest = File.expand_path(File.dirname(__FILE__) + "/data/#{taget.last}/#{taget.first}")
   FileUtils.copy_file(src, dest)
@@ -90,7 +96,7 @@ describe Unpack,"should work with zip files" do
   
   it "should find some zip files" do
     @unpack.should have_at_least(1).files
-    @unpack.files.reject {|file| file.match(/\.zip$/) }.count.should > 0
+    @unpack.files.reject {|file| ! file.match(/\.zip$/) }.count.should > 0
   end
   
   it "should be able to unpack zip files" do

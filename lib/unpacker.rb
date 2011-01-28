@@ -74,7 +74,7 @@ class Unpack
       # Finding every file in this directory
       Dir.glob(path + '/*').each do |file|
         # Is the found file as the same type as the one that got unpacked?
-        puts FileUtils.rm(file) if Mimer.identify(file).send(:"#{type}?")
+        FileUtils.rm(file) if Mimer.identify(file).send(:"#{type}?")
       end
     end
   end
