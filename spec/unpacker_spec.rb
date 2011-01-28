@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper.rb')
 
+# Preparing the file structure 
 def clear!
-  # Preparing the file structure 
   {'some_zip_files.zip' => 'zip_real', 'test_package.rar' => 'rar_real'}.each_pair do |taget|
 
     # Removes old files in the test directory
@@ -21,16 +21,52 @@ def clear!
 end
 
 describe Unpack, "should work with the runner" do
-  before(:all) do
+  before(:each) do
     clear!
     @path = File.expand_path('spec/data/rar_real')
+    @unpack = Unpack.runner!('spec/data/rar_real', remove: true, min_files: 0)
   end
   
-  it "should unpack some files" do    
+  it "should unpack some files" do
+    clear!   
     files = %x{cd #{@path} && ls}.split(/\n/).count
-    puts files.inspect
     Unpack.runner!('spec/data/rar_real', remove: true, min_files: 0)    
     %x{cd #{@path} && ls}.split(/\n/).count.should_not eq(files)
+  end
+  
+  it "should have 1 directory" do
+    @unpack.count.should eq(1)
+  end
+  
+  it "should have 5 new files" do
+    @unpack.first.should have(5).files
+  end
+  
+  it "should only contain files that exists" do
+    @unpack.first.files.each do |file|
+      File.exists?(file).should be_true
+    end
+  end
+  
+  it "should only contain an existsing directory" do
+    directory = @unpack.first.directory
+    Dir.exists?(directory).should be_true
+  end
+  
+  it "should not remove old files when the remove param isn't present" do
+    clear!
+    Unpack.runner!('spec/data/rar_real', min_files: 0)
+    %x{cd #{@path} && ls}.should have(6).split(/\n/)
+  end
+  
+  it "should remove old files if the remove param is present" do
+    clear!
+    Unpack.runner!('spec/data/rar_real', min_files: 0, remove: true)
+    %x{cd #{@path} && ls}.should have(5).split(/\n/)
+  end
+  
+  it "should not find any files if the {min_files} param is very large" do
+    Unpack.runner!('spec/data/rar_real', min_files: 100).should be_empty
   end
 end
 
