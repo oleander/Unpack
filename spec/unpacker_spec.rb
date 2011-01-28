@@ -68,6 +68,12 @@ describe Unpack, "should work with the runner" do
   it "should not find any files if the {min_files} param is very large" do
     Unpack.runner!('spec/data/rar_real', min_files: 100).should be_empty
   end
+  
+  it "should return an Exception (not in production) if the path to Unpack.runner! does not exist" do
+    lambda { 
+      Unpack.runner!('some/none/existing/path')
+    }.should raise_error(Exception)
+  end
 end
 
 describe Unpack do

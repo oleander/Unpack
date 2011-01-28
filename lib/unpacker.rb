@@ -14,6 +14,7 @@ class Unpack
     }
     
     @removeable = {}
+    
     @options.merge!(args[:options]) if args[:options]
     
     # If the path is relative
@@ -22,12 +23,12 @@ class Unpack
     # Makes shure that every directory structure looks the same
     @directory = Dir.new(@directory).path rescue nil
     
-    raise Exception.new("You need to specify a valid path") unless Dir.exist?(@directory)
+    raise Exception.new("You need to specify a valid path") if @directory.nil? or not Dir.exist?(@directory)
     raise Exception.new("You need unzip to keep going") if %x{whereis unzip}.empty?
   end
   
-  def self.runner!(directory, options)
-    unpack = Unpack.new(directory: directory, options: options) #  rescue nil
+  def self.runner!(directory, options = {})
+    unpack = Unpack.new(directory: directory, options: options) rescue nil
     
     # If the initializer raised any excetions
     return [] if unpack.nil?
