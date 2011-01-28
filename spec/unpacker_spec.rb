@@ -155,3 +155,23 @@ describe Unpack, "should work on real files" do
     %x{cd #{@path} && ls}.split(/\n/).count.should < files
   end
 end
+
+describe Unpack, "should work with all kind of paths" do
+  it "should raise an exception if an invalid path is being used" do
+    lambda{
+      Unpack.new(directory: "/some/non/existing/dir")
+    }.should raise_error(Exception)
+  end
+  
+  it "should work with a relative path" do
+    lambda{
+      Unpack.new(directory: "spec")
+    }.should_not raise_error(Exception)
+  end
+  
+  it "should not work with an incorect relative path" do
+    lambda{
+      Unpack.new(directory: "spec/random")
+    }.should raise_error(Exception)
+  end
+end

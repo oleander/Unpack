@@ -9,11 +9,21 @@ class Unpack
     @options = {
       :min_files => 5,
       :depth => 2,
-      :absolute_path_to_unrar => "#{File.dirname(__FILE__)}/../bin/unrar"
+      :absolute_path_to_unrar => "#{File.dirname(__FILE__)}/../bin/unrar",
+      :debugger => false
     }
     
     @removeable = {}
     @options.merge!(args[:options]) if args[:options]
+    
+    # If the path is relative
+    @directory = Dir.exist?(@directory) ?  @directory : File.expand_path(@directory)
+    
+    # Makes shure that every directory structure looks the same
+    @directory = Dir.new(@directory).path rescue nil
+    
+    raise Exception.new("You need to specify a valid path") unless Dir.exist?(@directory)
+    raise Exception.new("You need unzip to keep going") if %x{whereis unzip}.empty?
   end
    
   def prepare!
@@ -52,23 +62,11 @@ class Unpack
         @removeable.merge!(path => {:file_type => 'rar'})
         self.unrar(path: path, file: file)
       else
-        puts "Something went wrong, the mime type does not match zip or rar"
+        puts "Something went wrong, the mime type does not match zip or rar" if @options[:debugger]
       end
-            
+      
       @removeable[path].merge!(:diff => Dir.new(path).entries - before) if @removeable[path] 
     end
-  end
-  
-  def unrar(args)
-    %x(cd #{args[:path].gsub(/\s+/, '\ ')} && #{@options[:absolute_path_to_unrar]} e -y #{args[:file]})
-  end
-
-  def unzip(args)
-    %x(unzip -n #{args[:file]} -d #{args[:path].gsub(/\s+/, '\ ')})    
-  end
-  
-  def find_file_type(file_type)
-    %x{cd #{@directory} && find #{@directory} -type f -maxdepth #{(@options[:depth])} -name \"*.#{file_type}\"}.split(/\n/)
   end
   
   def wipe!
@@ -90,5 +88,17 @@ class Unpack
     @removeable = @removeable.map do |value|
       Container.new(files: value.last[:diff], directory: value.first)
     end
+  end
+  
+  def unrar(args)
+    %x(cd #{args[:path].gsub(/\s+/, '\ ')} && #{@options[:absolute_path_to_unrar]} e -y #{args[:file]})
+  end
+
+  def unzip(args)
+    %x(unzip -n #{args[:file]} -d #{args[:path].gsub(/\s+/, '\ ')})    
+  end
+  
+  def find_file_type(file_type)
+    %x{cd #{@directory} && find #{@directory} -type f -maxdepth #{(@options[:depth])} -name \"*.#{file_type}\"}.split(/\n/)
   end
 end
