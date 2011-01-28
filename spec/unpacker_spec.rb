@@ -75,14 +75,20 @@ end
 
 describe Unpack,"should work with zip files" do
   before(:all) do
-    @unpack = Unpack.new(directory: File.expand_path('spec/data/zip'), options: {min_files: 1})
+    @path = File.expand_path('spec/data/zip_real')
+    @unpack = Unpack.new(directory: @path, options: {min_files: 1})
     @unpack.prepare!
     @unpack.clean!
   end
   
   it "should find some zip files" do
     @unpack.should have_at_least(1).files
-    @unpack.files.each {|file| file.should match(/\.zip$/) }
+    @unpack.files.reject {|file| file.match(/\.zip$/) }.count.should > 0
+  end
+  
+  it "should be able to unpack zip files" do
+    @unpack.unpack!
+    %x{cd #{@path} && ls}.split(/\n/).reject {|file| ! file.match(/\_real\_/)}.count.should > 0
   end
 end
 
@@ -98,5 +104,9 @@ describe Unpack, "should work on real files" do
     @unpack.unpack!
     
     %x{cd #{@path} && ls}.split(/\n/).reject {|file| ! file.match(/\_real\_/)}.count.should > 0
+  end
+  
+  it "should be able to " do
+    
   end
 end

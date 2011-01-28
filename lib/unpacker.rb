@@ -1,3 +1,5 @@
+require 'mimer_plus'
+
 class Unpack
   attr_accessor :files
   
@@ -36,8 +38,15 @@ class Unpack
   end
   
   def unpack!
-    @files.each  do |file| 
-      self.unrar(path: File.dirname(file), file: file)
+    @files.each  do |file|
+      type = Mimer.identify(file)
+      if type.zip?
+        self.unzip(path: File.dirname(file), file: file)
+      elsif type.rar?
+        self.unrar(path: File.dirname(file), file: file)
+      else
+        puts "Something went wrong, the mime type does not match zip or rar"
+      end
     end
   end
   
@@ -45,8 +54,8 @@ class Unpack
     %x(cd #{args[:path].gsub(/\s+/, '\ ')} && #{@options[:absolute_path_to_unrar]} e -y #{args[:file]})
   end
 
-  def unzip(full_path_to_file)
-    %x(unzip -n /tmp/#{filename} -d #{path.gsub(/\s+/, '\ ')})
+  def unzip(args)
+    %x(unzip -n #{args[:file]} -d #{args[:path].gsub(/\s+/, '\ ')})
   end
   
   def find_file_type(file_type)
