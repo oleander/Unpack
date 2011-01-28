@@ -1,7 +1,7 @@
 require 'mimer_plus'
 require 'unpacker/container'
 class Unpack
-  attr_accessor :files
+  attr_accessor :files, :options
   
   def initialize(args)
     args.keys.each { |name| instance_variable_set "@" + name.to_s, args[name] }
@@ -17,7 +17,7 @@ class Unpack
     @options.merge!(args[:options]) if args[:options]
     
     # If the path is relative
-    @directory = Dir.exist?(@directory) ?  @directory : File.expand_path(@directory)
+    @directory = File.expand_path(@directory) unless @directory.match(/^\//)
     
     # Makes shure that every directory structure looks the same
     @directory = Dir.new(@directory).path rescue nil
@@ -25,7 +25,19 @@ class Unpack
     raise Exception.new("You need to specify a valid path") unless Dir.exist?(@directory)
     raise Exception.new("You need unzip to keep going") if %x{whereis unzip}.empty?
   end
-   
+  
+  def self.runner!(directory, options)
+    unpack = Unpack.new(directory: directory, options: options) #  rescue nil
+    
+    # If the initializer raised any excetions
+    return [] if unpack.nil?
+    unpack.prepare!
+    unpack.clean!
+    unpack.unpack!
+    unpack.wipe! if options[:remove]
+    unpack.diff
+  end
+  
   def prepare!
     @directory.gsub!(/\s+/, '\ ')
     @files = []
@@ -69,6 +81,7 @@ class Unpack
     end
   end
   
+  # Removes the old rar and zip files
   def wipe!
     @removeable.each do |value|
       path = value.first
@@ -98,7 +111,7 @@ class Unpack
     %x(unzip -n #{args[:file]} -d #{args[:path].gsub(/\s+/, '\ ')})    
   end
   
-  def find_file_type(file_type)
+  def find_file_type(file_type)    
     %x{cd #{@directory} && find #{@directory} -type f -maxdepth #{(@options[:depth])} -name \"*.#{file_type}\"}.split(/\n/)
   end
 end

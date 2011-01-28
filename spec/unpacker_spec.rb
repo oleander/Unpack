@@ -1,25 +1,42 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper.rb')
 
-# Preparing the file structure 
-{'some_zip_files.zip' => 'zip_real', 'test_package.rar' => 'rar_real'}.each_pair do |taget|
-  
+def clear!
+  # Preparing the file structure 
+  {'some_zip_files.zip' => 'zip_real', 'test_package.rar' => 'rar_real'}.each_pair do |taget|
+
+    # Removes old files in the test directory
+    Dir.glob(File.expand_path(File.dirname(__FILE__) + "/data/#{taget.last}/*")).each do |file|
+      FileUtils.rm(file) if Mimer.identify(file).text?
+    end
+
+    src = File.expand_path(File.dirname(__FILE__) + "/data/o_files/#{taget.first}")
+    dest = File.expand_path(File.dirname(__FILE__) + "/data/#{taget.last}/#{taget.first}")
+    FileUtils.copy_file(src, dest)
+  end
+
   # Removes old files in the test directory
-  Dir.glob(File.expand_path(File.dirname(__FILE__) + "/data/#{taget.last}/*")).each do |file|
+  Dir.glob(File.expand_path(File.dirname(__FILE__) + "/data/movie_to/*")).each do |file|
     FileUtils.rm(file) if Mimer.identify(file).text?
   end
-  
-  src = File.expand_path(File.dirname(__FILE__) + "/data/o_files/#{taget.first}")
-  dest = File.expand_path(File.dirname(__FILE__) + "/data/#{taget.last}/#{taget.first}")
-  FileUtils.copy_file(src, dest)
 end
 
-# Removes old files in the test directory
-Dir.glob(File.expand_path(File.dirname(__FILE__) + "/data/movie_to/*")).each do |file|
-  FileUtils.rm(file) if Mimer.identify(file).text?
+describe Unpack, "should work with the runner" do
+  before(:all) do
+    clear!
+    @path = File.expand_path('spec/data/rar_real')
+  end
+  
+  it "should unpack some files" do    
+    files = %x{cd #{@path} && ls}.split(/\n/).count
+    puts files.inspect
+    Unpack.runner!('spec/data/rar_real', remove: true, min_files: 0)    
+    %x{cd #{@path} && ls}.split(/\n/).count.should_not eq(files)
+  end
 end
 
 describe Unpack do
   before(:each) do
+    clear!
     @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'))
     @unpack.prepare!
   end
@@ -70,6 +87,10 @@ describe Unpack do
 end
 
 describe Unpack, "should work with options" do
+  before(:each) do
+    clear!
+  end
+  
   it "should not return any files when min is set to 0" do
     @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {depth: 0})
     @unpack.prepare!
@@ -93,6 +114,7 @@ end
 
 describe Unpack,"should work with zip files" do
   before(:all) do
+    clear!
     @path = File.expand_path('spec/data/zip_real')
     @unpack = Unpack.new(directory: @path, options: {min_files: 1})
     @unpack.prepare!
@@ -137,7 +159,8 @@ describe Unpack,"should work with zip files" do
 end
 
 describe Unpack, "should work on real files" do
-  before(:all) do
+  before(:each) do
+    clear!
     @path = File.expand_path('spec/data/rar_real')
     @unpack = Unpack.new(directory: @path, options: {min_files: 0})
     @unpack.prepare!
