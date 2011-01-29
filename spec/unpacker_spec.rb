@@ -136,6 +136,11 @@ describe Unpack do
   it "should have an executable unrar bin" do
     File.executable_real?(@unpack.options[:absolute_path_to_unrar]).should be_true
   end
+  
+  it "should be possible to set and read options" do
+    @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {debugger: true})
+    @unpack.options[:debugger].should be_true
+  end
 end
 
 describe Unpack, "should work with options" do

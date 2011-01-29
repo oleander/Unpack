@@ -81,14 +81,15 @@ class Unpack
       # What files/folders where unpacked?
       diff = Dir.new(path).entries - before
       
-      @removeable[path].merge!(:diff => diff) if @removeable[path] and diff.any?
-      
+      @removeable[path] and diff.any? ? @removeable[path].merge!(:diff => diff) : @removeable.delete(path)
+        
       # Some debug info
-      if @options[:debugger] and diff.any?
+      if @options[:debugger] and diff.any? and @removeable[path]
         puts "#{diff.count} where unpacked"
         puts "The archive was of type #{@removeable[path][:file_type]}"
         puts "The name of the file(s) are #{diff.join(', ')}"
         puts "The path is #{path}"
+        STDOUT.flush
       end
     end
   end
