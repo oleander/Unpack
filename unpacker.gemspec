@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email       = ["linus@oleander.nu"]
   s.homepage    = "https://github.com/oleander/Unpacker"
   s.summary     = %q{An automated unrar gem}
-  s.description = %q{Unpack rar and zip files in a certain directory}
+  s.description = %q{An automated unpacking tool for Mac OS X, using Ruby 1.9.2}
 
   s.rubyforge_project = "unpacker"
 
