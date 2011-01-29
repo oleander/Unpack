@@ -1,5 +1,7 @@
 require 'mimer_plus'
 require 'unpacker/container'
+require 'fileutils'
+
 class Unpack
   attr_accessor :files, :options
   
@@ -10,6 +12,7 @@ class Unpack
       :min_files              => 5,
       :depth                  => 2,
       :debugger               => false,
+      :force_remove           => false,
       :absolute_path_to_unrar => "#{File.dirname(__FILE__)}/../bin/unrar"
     }
     
@@ -101,7 +104,7 @@ class Unpack
       type = value.last[:file_type]
       
       # Does not remove anything if nothing where unpacked
-      next if value.last[:diff].empty?
+      next if value.last[:diff].empty? and not @options[:force_remove]
       
       puts "Removing files in #{path}" if @options[:debugger]
       
