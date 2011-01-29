@@ -1,10 +1,9 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "unpack/version"
 
 Gem::Specification.new do |s|
   s.name        = "unpack"
-  s.version     = Unpack::VERSION
+  s.version     = "0.1.4"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Linus Oleander"]
   s.email       = ["linus@oleander.nu"]
