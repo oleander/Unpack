@@ -116,7 +116,7 @@ class Unpack
   end
   
   def unrar(args)
-    %x(cd #{args[:path].gsub(/\s+/, '\ ')} && #{@options[:absolute_path_to_unrar]} e -y #{args[:file]})
+    %x(cd #{args[:path].gsub(/\s+/, '\ ')} && #{@options[:absolute_path_to_unrar]} e -y -o- #{args[:file]})
   end
 
   def unzip(args)
