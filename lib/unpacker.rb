@@ -110,7 +110,7 @@ class Unpack
   
   def diff
     # The code below this line can only be called once
-    return @removeable if @removeable.first.class == Container or @removeable.first.class == NilClass
+    return @removeable if @removeable.first.class == Container
     @removeable = @removeable.map do |value|
       Container.new(files: value.last[:diff], directory: value.first)
     end

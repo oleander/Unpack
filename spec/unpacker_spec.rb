@@ -80,6 +80,10 @@ describe Unpack, "should work with the runner" do
       Unpack.runner!
     }.should_not raise_error(Exception)
   end
+  
+  it "should allways return an array" do
+    Unpack.runner!('spec/data/rar_real', depth: 0).should be_instance_of(Array)
+  end
 end
 
 describe Unpack do
