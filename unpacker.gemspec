@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Linus Oleander"]
   s.email       = ["linus@oleander.nu"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/oleander/Unpacker"
   s.summary     = %q{An automated unrar gem}
   s.description = %q{Unpack rar and zip files in a certain directory}
 
