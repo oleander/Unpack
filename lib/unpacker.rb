@@ -7,10 +7,10 @@ class Unpack
     args.keys.each { |name| instance_variable_set "@" + name.to_s, args[name] }
     
     @options = {
-      :min_files => 5,
-      :depth => 2,
-      :absolute_path_to_unrar => "#{File.dirname(__FILE__)}/../bin/unrar",
-      :debugger => false
+      :min_files              => 5,
+      :depth                  => 2,
+      :debugger               => false,
+      :absolute_path_to_unrar => "#{File.dirname(__FILE__)}/../bin/unrar"
     }
     
     @removeable = {}
