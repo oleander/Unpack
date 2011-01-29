@@ -1,8 +1,8 @@
 # Unpack*(er)* - *run files, run*
 
-## What is Unpacker?
+## What is Unpack?
 
-Unpacker makes it possible to unarchive rar and zip files using ruby.
+Unpack makes it possible to unarchive rar and zip files using ruby.
 
 You pass a directory and it will find all your archive files, unpack and remove them (if you want to).
 
@@ -10,9 +10,9 @@ You pass a directory and it will find all your archive files, unpack and remove 
 
 ### Start by installing the gem
 
-    sudo gem install unpacker
+    sudo gem install unpack
 
-Start `irb` and include the gem, `require 'unpacker'`
+Start `irb` and include the gem, `require 'unpack'`
 
 ### Unpack everything in the current directory
 
@@ -82,4 +82,4 @@ The gem is tested in OS X 10.6.6 using Ruby 1.9.2
 ## Thanks to ...
 
 - the [UnRarX](http://homepage.mac.com/pnoriega/unrar.html) team that provies the unrar binary.
-- [NinoScript](https://github.com/NinoScript) that solved the console-escaping issue - [see this commit](https://github.com/oleander/Unpacker/commit/dd7e46200a490c7af9fc5f770127291192a818f5).
+- [NinoScript](https://github.com/NinoScript) that solved the console-escaping issue - [see this commit](https://github.com/oleander/Unpack/commit/dd7e46200a490c7af9fc5f770127291192a818f5).

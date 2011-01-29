@@ -1,5 +1,5 @@
 require 'mimer_plus'
-require 'unpacker/container'
+require 'unpack/container'
 require 'fileutils'
 
 class Unpack

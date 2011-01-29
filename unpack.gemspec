@@ -1,18 +1,16 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "unpacker/version"
+require "unpack/version"
 
 Gem::Specification.new do |s|
-  s.name        = "unpacker"
-  s.version     = Unpacker::VERSION
+  s.name        = "unpack"
+  s.version     = Unpack::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Linus Oleander"]
   s.email       = ["linus@oleander.nu"]
-  s.homepage    = "https://github.com/oleander/Unpacker"
+  s.homepage    = "https://github.com/oleander/Unpack"
   s.summary     = %q{An automated unrar gem}
   s.description = %q{An automated unpacking tool for Mac OS X, using Ruby 1.9.2}
-
-  s.rubyforge_project = "unpacker"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
