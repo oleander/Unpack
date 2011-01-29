@@ -114,6 +114,9 @@ class Unpack
     @removeable = @removeable.map do |value|
       Container.new(files: value.last[:diff], directory: value.first)
     end
+    
+    # Never return the hash
+    @removeable.empty? ? [] : @removeable
   end
   
   def unrar(args)
