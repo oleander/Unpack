@@ -100,6 +100,9 @@ class Unpack
       path = value.first
       type = value.last[:file_type]
       
+      # Does not remove anything if nothing where unpacked
+      next if value.last[:diff].empty?
+      
       puts "Removing files in #{path}" if @options[:debugger]
       
       # Finding every file in this directory
