@@ -78,7 +78,18 @@ class Unpack
         puts "Something went wrong, the mime type does not match zip or rar" if @options[:debugger]
       end
       
-      @removeable[path].merge!(:diff => Dir.new(path).entries - before) if @removeable[path] 
+      # What files/folders where unpacked?
+      diff = Dir.new(path).entries - before
+      
+      @removeable[path].merge!(:diff => diff) if @removeable[path] and diff.any?
+      
+      # Some debug info
+      if @options[:debugger] and diff.any?
+        puts "#{diff.count} where unpacked"
+        puts "The archive was of type #{@removeable[path][:file_type]}"
+        puts "The name of the file(s) are #{diff.join(', ')}"
+        puts "The path is #{path}"
+      end
     end
   end
   

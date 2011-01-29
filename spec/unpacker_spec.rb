@@ -126,6 +126,10 @@ describe Unpack do
   it "should not contain any strange files" do
     @unpack.files.each {|file| file.should_not match(/\.strange$/)}
   end
+  
+  it "should have an executable unrar bin" do
+    File.executable_real?(@unpack.options[:absolute_path_to_unrar]).should be_true
+  end
 end
 
 describe Unpack, "should work with options" do
