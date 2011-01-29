@@ -132,11 +132,11 @@ class Unpack
   end
   
   def unrar(args)
-    %x(cd #{args[:path].gsub(/\s+/, '\ ')} && #{@options[:absolute_path_to_unrar]} e -y -o- #{args[:file]})
+    %x(cd #{args[:path].gsub(/\s+/, '\ ')} && #{@options[:absolute_path_to_unrar].gsub(/\s+/, '\ ')} e -y -o- #{args[:file].gsub(/\s+/, '\ ')})
   end
 
   def unzip(args)
-    %x(unzip -n #{args[:file]} -d #{args[:path].gsub(/\s+/, '\ ')})    
+    %x(unzip -n #{args[:file].gsub(/\s+/, '\ ')} -d #{args[:path].gsub(/\s+/, '\ ')})    
   end
   
   def find_file_type(file_type)    
