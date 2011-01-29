@@ -81,7 +81,7 @@ class Unpack
       # What files/folders where unpacked?
       diff = Dir.new(path).entries - before
       
-      @removeable[path] and diff.any? ? @removeable[path].merge!(:diff => diff) : @removeable.delete(path)
+      @removeable[path] ? @removeable[path].merge!(:diff => diff) : @removeable.delete(path)
         
       # Some debug info
       if @options[:debugger] and diff.any? and @removeable[path]
@@ -100,6 +100,8 @@ class Unpack
       path = value.first
       type = value.last[:file_type]
       
+      puts "Removing files in #{path}" if @options[:debugger]
+      
       # Finding every file in this directory
       Dir.glob(path + '/*').each do |file|
         # Is the found file as the same type as the one that got unpacked?
@@ -111,6 +113,10 @@ class Unpack
   def diff
     # The code below this line can only be called once
     return @removeable if @removeable.first.class == Container
+    
+    # Removing some non welcome data
+    @removeable.reject!{|item| @removeable[item][:diff].nil?}
+    
     @removeable = @removeable.map do |value|
       Container.new(files: value.last[:diff], directory: value.first)
     end
