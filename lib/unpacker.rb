@@ -13,6 +13,7 @@ class Unpack
       :depth                  => 2,
       :debugger               => false,
       :force_remove           => false,
+      :remove                 => false,
       :absolute_path_to_unrar => "#{File.dirname(__FILE__)}/../bin/unrar"
     }
     
