@@ -3,13 +3,13 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "unpack"
-  s.version     = "0.1.4"
+  s.version     = "0.1.5"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Linus Oleander"]
   s.email       = ["linus@oleander.nu"]
   s.homepage    = "https://github.com/oleander/Unpack"
   s.summary     = %q{An automated unrar gem}
-  s.description = %q{An automated unpacking tool for Mac OS X, using Ruby 1.9.2}
+  s.description = %q{An automated unpacking tool for *nix, using Ruby 1.9.2}
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
