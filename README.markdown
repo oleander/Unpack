@@ -82,4 +82,4 @@ The gem is tested in OS X 10.6.6 using Ruby 1.9.2
 ## Thanks to ...
 
 - the [UnRarX](http://homepage.mac.com/pnoriega/unrar.html) team that provies the unrar binary.
-- NinoScript that solved the escaping issue - [see this commit](https://github.com/oleander/Unpacker/commit/dd7e46200a490c7af9fc5f770127291192a818f5).
+- [NinoScript](https://github.com/NinoScript) that solved the console-escaping issue - [see this commit](https://github.com/oleander/Unpacker/commit/dd7e46200a490c7af9fc5f770127291192a818f5).
