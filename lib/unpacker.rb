@@ -27,7 +27,7 @@ class Unpack
     raise Exception.new("You need unzip to keep going") if %x{whereis unzip}.empty?
   end
   
-  def self.runner!(directory, options = {})
+  def self.runner!(directory = '.', options = {})
     unpack = Unpack.new(directory: directory, options: options) rescue nil
     
     # If the initializer raised any excetions

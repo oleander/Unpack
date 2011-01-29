@@ -74,6 +74,12 @@ describe Unpack, "should work with the runner" do
       Unpack.runner!('some/none/existing/path')
     }.should raise_error(Exception)
   end
+  
+  it "should not return an exception without any arguments" do
+    lambda { 
+      Unpack.runner!
+    }.should_not raise_error(Exception)
+  end
 end
 
 describe Unpack do
