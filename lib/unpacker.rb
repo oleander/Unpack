@@ -121,7 +121,7 @@ class Unpack
     return @removeable if @removeable.first.class == Container
     
     # Removing some non welcome data
-    @removeable.reject!{|item| @removeable[item][:diff].nil?}
+    @removeable.reject!{|item| @removeable[item][:diff].nil? or @removeable[item][:diff].empty?}
     
     @removeable = @removeable.map do |value|
       Container.new(files: value.last[:diff], directory: value.first)
