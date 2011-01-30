@@ -314,4 +314,13 @@ describe Unpack, "should be able to unpack" do
       Unpack.it!(file: "some/random/folder")
     }.should raise_error(Exception)
   end
+  
+  it "should remove the old archive files" do
+    Unpack.it!(file: "spec/data/from/test_package.rar", remove: true)
+    %x{cd #{@from} && ls | grep test_package.rar}.should be_empty
+  end
+  
+  it "should have some unarchived files" do
+    Unpack.it!(file: "spec/data/from/test_package.rar").should have(5).files
+  end
 end

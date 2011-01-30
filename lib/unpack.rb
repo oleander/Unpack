@@ -3,7 +3,7 @@ require 'unpack/container'
 require 'fileutils'
 
 class Unpack
-  attr_accessor :files, :options, :directory
+  attr_accessor :files, :options, :directory, :removeable
   
   def initialize(args)
     args.keys.each { |name| instance_variable_set "@" + name.to_s, args[name] }
@@ -38,13 +38,17 @@ class Unpack
     args[:to] = args[:to].nil? ? File.dirname(args[:file]) : args[:to]
     
     # Adding the options that is being passed to {it!} directly to {Unpack}
-    this = self.new({min_files: 0, directory: args[:to]}.merge(args))
+    this = self.new(directory: args[:to], options: {min_files: 0}.merge(args))
     
     # Is the file path absolute ? good, do nothing : get the absolute path
     file = args[:file].match(/^\//) ? args[:file] : File.expand_path(args[:file])
     
     this.files << file
     this.unpack!
+    this.wipe! if this.options[:remove]
+    
+    # Only one files has been unpacked, that is why we select the first object in the list
+    this.diff.first
   end
   
   def self.runner!(directory = '.', options = {})
