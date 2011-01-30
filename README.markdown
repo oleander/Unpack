@@ -14,6 +14,8 @@ You pass a directory and it will find all your archive files, unpack and remove 
 
 Start `irb` and include the gem, `require 'unpack'`
 
+## Working with a directory
+
 ### Unpack everything in the current directory
 
     $ Unpack.runner!
@@ -40,7 +42,7 @@ Start `irb` and include the gem, `require 'unpack'`
     
     $ Unpack.runner!('.', depth: 3)
     => [#<Container:0x000001010ab458 @files=["dmd-tsa-cd2.avi"], @directory="/Downloads/Some.Super.Movie/CD2">]
-    
+
 ### Unpack everything, even one file directories
 
 To prevent you from unarchive files in folders that contains subtitles and other nonrelevant files, the folder must contain 5 archive files or more.
@@ -49,8 +51,27 @@ If you want to unpack everything, even subtitles directories, then you will have
 
     $ Unpack.runner!('.', min_files: 0)
     => [#<Container:0x000001010ab458 @files=["english.str"], @directory="/Downloads/Subtitle/">]
+    
+## Working with one specific file
 
-### Some configure alternatives
+### Unpack a file
+    
+    $ Unpack.it!(file: 'zip/my_file.zip')
+    => [#<Container:0x000001010ab458 @files=["file1", "file2"], @directory="/Downloads/my/files/zip">]
+    
+### Unpack a specific file, removing it when done 
+    
+    $ Unpack.it!(file: 'zip/my_file.zip', remove: true)
+    => [#<Container:0x000001010ab458 @files=["file1", "file2"], @directory="/Downloads/my/files/zip">]
+    
+### Unpack a specific file and move the new files to a destination directory
+    
+    $ Unpack.it!(file: 'zip/my_file.zip', to: '/tmp')
+    => [#<Container:0x000001010ab458 @files=["file1", "file2"], @directory="/tmp">]
+
+## Some configure alternatives
+
+### The *runner!* method
 
 - ** :min_files ** (Integer) The minimum amount of files in the directory you want to archive the files in. *Default is 5*.
 - ** :depth ** (Integer) The maximum folder depth. *Default is 2*.
@@ -59,9 +80,18 @@ If you want to unpack everything, even subtitles directories, then you will have
 - ** :remove ** (Boolean) Removes archived files after they have been used. *Default is false*.
 - ** :absolute_path_to_unrar ** (String) The absolut path to the unrar binary. *Default is the [unrar](http://homepage.mac.com/pnoriega/unrar.html) binary that comes with the gem*.
 
+### The *it!* method
+
+- **:to** (String) The absolute or relative path to the destination directory. If nothing is defined, the *:file* path will be used.
+- **:file** (String) The absolute or relative path to the archive file.
+- **:remove** (Boolean) See the *runner!* method above
+- **:absolute_path_to_unrar** (String) See the *runner!* method above
+- **:debugger** (String) See the *runner!* method above
+
 ## What is being returned?
 
-The `runner!` method returns an `Array` of `Container` objects. 
+The `runner!` method returns an `Array` of `Container` instances. 
+The `it!` method returns an instance of `Container`. 
 
 These are the accessors of the `Container` class.
 
@@ -77,7 +107,8 @@ These are the accessors of the `Container` class.
 
 ## Requirements
 
-The gem is tested in OS X 10.6.6 using Ruby 1.9.2
+The gem is tested in OS X 10.6.6 using Ruby 1.9.2.
+It will not work in 1.8, due to the [new hash syntax](http://blog.peepcode.com/tutorials/2011/rip-ruby-hash-rocket-syntax).
 
 ## Thanks to ...
 
