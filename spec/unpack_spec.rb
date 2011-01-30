@@ -323,4 +323,8 @@ describe Unpack, "should be able to unpack" do
   it "should have some unarchived files" do
     Unpack.it!(file: "spec/data/from/test_package.rar").should have(5).files
   end
+  
+  it "should contain the right directory when defining a destination path" do
+    Unpack.it!(file: "spec/data/from/test_package.rar", to: 'spec/data/to').directory.should match(/spec\/data\/to/)
+  end
 end
