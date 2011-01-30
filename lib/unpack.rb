@@ -3,7 +3,7 @@ require 'unpack/container'
 require 'fileutils'
 
 class Unpack
-  attr_accessor :files, :options
+  attr_accessor :files, :options, :directory
   
   def initialize(args)
     args.keys.each { |name| instance_variable_set "@" + name.to_s, args[name] }
@@ -29,6 +29,22 @@ class Unpack
     
     raise Exception.new("You need to specify a valid path") if @directory.nil? or not Dir.exist?(@directory)
     raise Exception.new("You need unzip to keep going") if %x{whereis unzip}.empty?
+    
+    @files = []
+  end
+  
+  def self.it!(args)
+    # If no to argument is given, file will be unpacked in the same dir
+    args[:to] = args[:to].nil? ? File.dirname(args[:file]) : args[:to]
+    
+    # Adding the options that is being passed to {it!} directly to {Unpack}
+    this = self.new({min_files: 0, directory: args[:to]}.merge(args))
+    
+    # Is the file path absolute ? good, do nothing : get the absolute path
+    file = args[:file].match(/^\//) ? args[:file] : File.expand_path(args[:file])
+    
+    this.files << file
+    this.unpack!
   end
   
   def self.runner!(directory = '.', options = {})
@@ -69,7 +85,10 @@ class Unpack
   def unpack!
     @files.each  do |file|
       type = Mimer.identify(file)
-      path = File.dirname(file)
+      
+      # To what directory want we to unpack the file ? The same as the file : The one that where specified in {initialize}
+      path = @directory == File.dirname(file) ? File.dirname(file) : @directory
+      
       before = Dir.new(path).entries
 
       if type.zip?

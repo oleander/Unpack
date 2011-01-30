@@ -2,6 +2,14 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper.rb')
 
 # Preparing the file structure 
 def clear!
+  
+  # Removes old files in the test directory
+  ['to', 'from'].each do |folder|
+    Dir.glob(File.expand_path(File.dirname(__FILE__) + "/data/#{folder}/*")).each do |file|
+      FileUtils.rm(file)
+    end
+  end
+   
   {'some_zip_files.zip' => 'zip_real', 'test_package.rar' => 'rar_real'}.each_pair do |taget|
 
     # Removes old files in the test directory
@@ -18,7 +26,14 @@ def clear!
   Dir.glob(File.expand_path(File.dirname(__FILE__) + "/data/movie_to/*")).each do |file|
     FileUtils.rm(file) if Mimer.identify(file).text?
   end
+  
+  {'test_package.rar' => 'to', 'some_zip_files.zip' => 'to'}.each_pair do |taget|
+    src = File.expand_path(File.dirname(__FILE__) + "/data/o_files/#{taget.first}")
+    dest = File.expand_path(File.dirname(__FILE__) + "/data/from/#{taget.first}")
+    FileUtils.copy_file(src, dest)
+  end
 end
+
 
 describe Unpack, "should work with the runner" do
   before(:each) do
@@ -256,6 +271,47 @@ describe Unpack, "should work with all kind of paths" do
   it "should not work with an incorect relative path" do
     lambda{
       Unpack.new(directory: "spec/random")
+    }.should raise_error(Exception)
+  end
+end
+
+describe Unpack, "should be able to unpack" do
+  before(:each) do
+    clear!
+    @path = File.expand_path('spec/data/to/')
+    @from = File.expand_path('spec/data/from/')
+  end
+  
+  it "should be able to unpack an unknown file from one dir to a nother" do
+    ['some_zip_files.zip', "test_package.rar"].each do |inner|
+      files = %x{cd #{@path} && ls}.split(/\n/).count
+      Unpack.it!(file: File.expand_path("spec/data/from/#{inner}"), to: @path)
+      %x{cd #{@path} && ls}.split(/\n/).count.should_not eq(files)
+      clear!
+    end
+  end
+  
+  it "should be able to unpack relative files" do
+    ['some_zip_files.zip', "test_package.rar"].each do |inner|
+      files = %x{cd #{@path} && ls}.split(/\n/).count
+      Unpack.it!(file: "spec/data/from/#{inner}", to: 'spec/data/to')
+      %x{cd #{@path} && ls}.split(/\n/).count.should_not eq(files)
+      clear!
+    end
+  end
+  
+  it "should be able to unpack to the same folder" do
+    ['some_zip_files.zip', "test_package.rar"].each do |inner|
+      files = %x{cd #{@from} && ls}.split(/\n/).count
+      Unpack.it!(file: "spec/data/from/#{inner}")
+      %x{cd #{@from} && ls}.split(/\n/).count.should_not eq(files)
+      clear!
+    end
+  end
+  
+  it "should raise an error when the path does not exist" do
+    lambda{
+      Unpack.it!(file: "some/random/folder")
     }.should raise_error(Exception)
   end
 end
