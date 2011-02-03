@@ -64,7 +64,6 @@ class Unpack
   end
   
   def prepare!
-    @directory.gsub!(/\s+/, '\ ')
     @files = []
     
     ['zip', 'rar'].each do |type|
@@ -164,6 +163,6 @@ class Unpack
   end
   
   def find_file_type(file_type)    
-    %x{cd '#{@directory}' && find '#{@directory}' -type f -maxdepth '#{(@options[:depth])}' -name \"*.#{file_type}\"}.split(/\n/)
+    %x{cd '#{@directory}' && find '#{@directory}' -type f -maxdepth '#{(@options[:depth])}' -name '*.#{file_type}'}.split(/\n/)
   end
 end
