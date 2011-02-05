@@ -27,7 +27,7 @@ class Unpack
     # Makes shure that every directory structure looks the same
     @directory = Dir.new(@directory).path rescue nil
     
-    raise Exception.new("You need to specify a valid path") if @directory.nil? or not Dir.exist?(@directory)
+    raise Exception.new("You need to specify a valid path") if @directory.nil? or Dir[@directory].empty?
     raise Exception.new("You need unzip to keep going") if %x{whereis unzip}.empty?
     
     @files = []
@@ -38,7 +38,7 @@ class Unpack
     args[:to] = args[:to].nil? ? File.dirname(args[:file]) : args[:to]
     
     # Adding the options that is being passed to {it!} directly to {Unpack}
-    this = self.new(directory: args[:to], options: {min_files: 0}.merge(args))
+    this = self.new(:directory => args[:to], :options => {:min_files => 0}.merge(args))
     
     # Is the file path absolute ? good, do nothing : get the absolute path
     file = args[:file].match(/^\//) ? args[:file] : File.expand_path(args[:file])
@@ -52,7 +52,7 @@ class Unpack
   end
   
   def self.runner!(directory = '.', options = {})
-    unpack = Unpack.new(directory: directory, options: options) rescue nil
+    unpack = Unpack.new(:directory => directory, :options => options) rescue nil
     
     # If the initializer raised any excetions
     return [] if unpack.nil?
@@ -70,7 +70,7 @@ class Unpack
       @files << find_file_type(type)
     end
     
-    @files.flatten!.map! {|file| File.absolute_path(file)}
+    @files.flatten!.map! {|file| File.expand_path(file, Dir.pwd)}
   end
   
   def clean!
@@ -96,10 +96,10 @@ class Unpack
 
       if type.zip?
         @removeable.merge!(path => {:file_type => 'zip'})
-        self.unzip(path: path, file: file)
+        self.unzip(:path => path, :file => file)
       elsif type.rar?
         @removeable.merge!(path => {:file_type => 'rar'})
-        self.unrar(path: path, file: file)
+        self.unrar(:path => path, :file => file)
       else
         puts "Something went wrong, the mime type does not match zip or rar" if @options[:debugger]
       end
@@ -144,10 +144,12 @@ class Unpack
     return @removeable if @removeable.first.class == Container
     
     # Removing some non welcome data
-    @removeable.reject!{|item| @removeable[item][:diff].nil? or @removeable[item][:diff].empty?}
+    @removeable.reject! do |item,_|
+      @removeable[item][:diff].nil? or @removeable[item][:diff].empty?
+    end
     
     @removeable = @removeable.map do |value|
-      Container.new(files: value.last[:diff], directory: value.first)
+      Container.new(:files => value.last[:diff], :directory => value.first)
     end
     
     # Never return the hash

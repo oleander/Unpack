@@ -10,15 +10,15 @@ def clear!
     end
   end
    
-  {'some_zip_files.zip' => 'zip_real', 'test_package.rar' => 'rar_real'}.each_pair do |taget|
+  {'some_zip_files.zip' => 'zip_real', 'test_package.rar' => 'rar_real'}.each_pair do |first, last|
 
     # Removes old files in the test directory
-    Dir.glob(File.expand_path(File.dirname(__FILE__) + "/data/#{taget.last}/*")).each do |file|
+    Dir.glob(File.expand_path(File.dirname(__FILE__) + "/data/#{last}/*")).each do |file|
       FileUtils.rm(file) if Mimer.identify(file).text?
     end
 
-    src = File.expand_path(File.dirname(__FILE__) + "/data/o_files/#{taget.first}")
-    dest = File.expand_path(File.dirname(__FILE__) + "/data/#{taget.last}/#{taget.first}")
+    src = File.expand_path(File.dirname(__FILE__) + "/data/o_files/#{first}")
+    dest = File.expand_path(File.dirname(__FILE__) + "/data/#{last}/#{first}")
     FileUtils.copy_file(src, dest)
   end
 
@@ -27,9 +27,9 @@ def clear!
     FileUtils.rm(file) if Mimer.identify(file).text?
   end
   
-  {'test_package.rar' => 'to', 'some_zip_files.zip' => 'to'}.each_pair do |taget|
-    src = File.expand_path(File.dirname(__FILE__) + "/data/o_files/#{taget.first}")
-    dest = File.expand_path(File.dirname(__FILE__) + "/data/from/#{taget.first}")
+  {'test_package.rar' => 'to', 'some_zip_files.zip' => 'to'}.each do |first,last|
+    src = File.expand_path(File.dirname(__FILE__) + "/data/o_files/#{first}")
+    dest = File.expand_path(File.dirname(__FILE__) + "/data/from/#{first}")
     FileUtils.copy_file(src, dest)
   end
 end
@@ -39,20 +39,20 @@ describe Unpack, "should work with the runner" do
   before(:each) do
     clear!
     @path = File.expand_path('spec/data/rar_real')
-    @unpack = Unpack.runner!('spec/data/rar_real', remove: true, min_files: 0)
+    @unpack = Unpack.runner!('spec/data/rar_real', :remove => true, :min_files => 0)
   end
   
   it "should unpack some files" do
     clear!   
     files = %x{cd #{@path} && ls}.split(/\n/).count
-    Unpack.runner!('spec/data/rar_real', remove: true, min_files: 0)    
+    Unpack.runner!('spec/data/rar_real', :remove => true, :min_files => 0)    
     %x{cd #{@path} && ls}.split(/\n/).count.should_not eq(files)
   end
   
   it "should have 1 directory" do
     @unpack.count.should eq(1)
   end
-  
+
   it "should have 5 new files" do
     @unpack.first.should have(5).files
   end
@@ -65,23 +65,23 @@ describe Unpack, "should work with the runner" do
   
   it "should only contain an existsing directory" do
     directory = @unpack.first.directory
-    Dir.exists?(directory).should be_true
+    Dir[directory].should_not be_empty
   end
   
   it "should not remove old files when the remove param isn't present" do
     clear!
-    Unpack.runner!('spec/data/rar_real', min_files: 0)
+    Unpack.runner!('spec/data/rar_real', :min_files => 0)
     %x{cd #{@path} && ls}.should have(6).split(/\n/)
   end
   
   it "should remove old files if the remove param is present" do
     clear!
-    Unpack.runner!('spec/data/rar_real', min_files: 0, remove: true)
+    Unpack.runner!('spec/data/rar_real', :min_files => 0, :remove => true)
     %x{cd #{@path} && ls}.should have(5).split(/\n/)
   end
   
   it "should not find any files if the {min_files} param is very large" do
-    Unpack.runner!('spec/data/rar_real', min_files: 100).should be_empty
+    Unpack.runner!('spec/data/rar_real', :min_files => 100).should be_empty
   end
   
   it "should return an Exception (not in production) if the path to Unpack.runner! does not exist" do
@@ -97,14 +97,15 @@ describe Unpack, "should work with the runner" do
   end
   
   it "should allways return an array" do
-    Unpack.runner!('spec/data/rar_real', depth: 0).should be_instance_of(Array)
+    Unpack.runner!('spec/data/rar_real', :depth => 0).should be_instance_of(Array)
   end
+
 end
 
 describe Unpack do
   before(:each) do
     clear!
-    @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'))
+    @unpack = Unpack.new(:directory => File.expand_path('spec/data/rar'))
     @unpack.prepare!
   end
   
@@ -157,7 +158,7 @@ describe Unpack do
   end
   
   it "should be possible to set and read options" do
-    @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {debugger: true})
+    @unpack = Unpack.new(:directory => File.expand_path('spec/data/rar'), :options => {:debugger => true})
     @unpack.options[:debugger].should be_true
   end
 end
@@ -168,20 +169,20 @@ describe Unpack, "should work with options" do
   end
   
   it "should not return any files when min is set to 0" do
-    @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {depth: 0})
+    @unpack = Unpack.new(:directory => File.expand_path('spec/data/rar'), :options => {:depth => 0})
     @unpack.prepare!
     @unpack.should have(0).files
   end
   
   it "should return subtitles rar files when min files is set to o" do
-    @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {min_files: 0})
+    @unpack = Unpack.new(:directory => File.expand_path('spec/data/rar'), :options => {:min_files => 0})
     @unpack.prepare!
     @unpack.clean!
     @unpack.files.reject {|file| ! file.match(/\_subtitle\_/) }.count.should > 0
   end
   
   it "should access some really deep files" do
-    @unpack = Unpack.new(directory: File.expand_path('spec/data/rar'), options: {depth: 100})
+    @unpack = Unpack.new(:directory =>File.expand_path('spec/data/rar'), :options => {:depth => 100})
     @unpack.prepare!
     @unpack.clean!
     @unpack.files.reject {|file| ! file.match(/\_not\_/) }.count.should > 0
@@ -192,7 +193,7 @@ describe Unpack,"should work with zip files" do
   before(:all) do
     clear!
     @path = File.expand_path('spec/data/zip_real')
-    @unpack = Unpack.new(directory: @path, options: {min_files: 1})
+    @unpack = Unpack.new(:directory => @path, :options => {:min_files => 1})
     @unpack.prepare!
     @unpack.clean!
   end
@@ -238,7 +239,7 @@ describe Unpack, "should work on real files" do
   before(:each) do
     clear!
     @path = File.expand_path('spec/data/rar_real')
-    @unpack = Unpack.new(directory: @path, options: {min_files: 0})
+    @unpack = Unpack.new(:directory => @path, :options => {:min_files => 0})
     @unpack.prepare!
     @unpack.clean!
     @unpack.unpack!
@@ -258,19 +259,19 @@ end
 describe Unpack, "should work with all kind of paths" do
   it "should raise an exception if an invalid path is being used" do
     lambda{
-      Unpack.new(directory: "/some/non/existing/dir")
+      Unpack.new(:directory => "/some/non/existing/dir")
     }.should raise_error(Exception)
   end
   
   it "should work with a relative path" do
     lambda{
-      Unpack.new(directory: "spec")
+      Unpack.new(:directory => "spec")
     }.should_not raise_error(Exception)
   end
   
   it "should not work with an incorect relative path" do
     lambda{
-      Unpack.new(directory: "spec/random")
+      Unpack.new(:directory => "spec/random")
     }.should raise_error(Exception)
   end
 end
@@ -285,7 +286,7 @@ describe Unpack, "should be able to unpack" do
   it "should be able to unpack an unknown file from one dir to a nother" do
     ['some_zip_files.zip', "test_package.rar"].each do |inner|
       files = %x{cd #{@path} && ls}.split(/\n/).count
-      Unpack.it!(file: File.expand_path("spec/data/from/#{inner}"), to: @path)
+      Unpack.it!(:file => File.expand_path("spec/data/from/#{inner}"), :to => @path)
       %x{cd #{@path} && ls}.split(/\n/).count.should_not eq(files)
       clear!
     end
@@ -294,7 +295,7 @@ describe Unpack, "should be able to unpack" do
   it "should be able to unpack relative files" do
     ['some_zip_files.zip', "test_package.rar"].each do |inner|
       files = %x{cd #{@path} && ls}.split(/\n/).count
-      Unpack.it!(file: "spec/data/from/#{inner}", to: 'spec/data/to')
+      Unpack.it!(:file => "spec/data/from/#{inner}", :to => 'spec/data/to')
       %x{cd #{@path} && ls}.split(/\n/).count.should_not eq(files)
       clear!
     end
@@ -303,7 +304,7 @@ describe Unpack, "should be able to unpack" do
   it "should be able to unpack to the same folder" do
     ['some_zip_files.zip', "test_package.rar"].each do |inner|
       files = %x{cd #{@from} && ls}.split(/\n/).count
-      Unpack.it!(file: "spec/data/from/#{inner}")
+      Unpack.it!(:file => "spec/data/from/#{inner}")
       %x{cd #{@from} && ls}.split(/\n/).count.should_not eq(files)
       clear!
     end
@@ -311,20 +312,20 @@ describe Unpack, "should be able to unpack" do
   
   it "should raise an error when the path does not exist" do
     lambda{
-      Unpack.it!(file: "some/random/folder")
+      Unpack.it!(:file => "some/random/folder")
     }.should raise_error(Exception)
   end
   
   it "should remove the old archive files" do
-    Unpack.it!(file: "spec/data/from/test_package.rar", remove: true)
+    Unpack.it!(:file => "spec/data/from/test_package.rar", :remove => true)
     %x{cd #{@from} && ls | grep test_package.rar}.should be_empty
   end
   
   it "should have some unarchived files" do
-    Unpack.it!(file: "spec/data/from/test_package.rar").should have(5).files
+    Unpack.it!(:file => "spec/data/from/test_package.rar").should have(5).files
   end
   
   it "should contain the right directory when defining a destination path" do
-    Unpack.it!(file: "spec/data/from/test_package.rar", to: 'spec/data/to').directory.should match(/spec\/data\/to/)
+    Unpack.it!(:file => "spec/data/from/test_package.rar", :to => 'spec/data/to').directory.should match(/spec\/data\/to/)
   end
 end
