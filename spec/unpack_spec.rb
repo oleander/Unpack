@@ -330,8 +330,9 @@ describe Unpack, "should be able to unpack" do
   end
   
   it "should work with folders that contain whitespace" do
+    %x{mkdir -p '/tmp/I Spit on Your Grave[2010][Unrated Edition]DvDrip[Eng]-FXG'}
     lambda {
-      Unpack.it!(:file => "spec/data/from/test_package.rar", :to => 'spec/data/folders/I Spit on Your Grave[2010][Unrated Edition]DvDrip[Eng]-FXG')
+      Unpack.it!(:file => "spec/data/from/test_package.rar", :to => '/tmp/I Spit on Your Grave[2010][Unrated Edition]DvDrip[Eng]-FXG')
     }.should_not raise_error(Exception)
   end
 end
