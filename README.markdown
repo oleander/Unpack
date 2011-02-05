@@ -107,8 +107,7 @@ These are the accessors of the `Container` class.
 
 ## Requirements
 
-The gem is tested in OS X 10.6.6 using Ruby 1.9.2.
-It will not work in 1.8, due to the [new hash syntax](http://blog.peepcode.com/tutorials/2011/rip-ruby-hash-rocket-syntax).
+The gem is tested in OS X 10.6.6 using Ruby 1.9.2 and 1.8.7.
 
 ## Thanks to ...
 
