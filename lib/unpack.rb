@@ -27,7 +27,7 @@ class Unpack
     # Makes shure that every directory structure looks the same
     @directory = Dir.new(@directory).path rescue nil
     
-    raise Exception.new("You need to specify a valid path") if @directory.nil? or Dir[@directory].empty?
+    raise Exception.new("You need to specify a valid path") if @directory.nil? or not system("test -r '#{@directory}'")
     raise Exception.new("You need unzip to keep going") if %x{whereis unzip}.empty?
     
     @files = []
