@@ -99,7 +99,19 @@ describe Unpack, "should work with the runner" do
   it "should allways return an array" do
     Unpack.runner!('spec/data/rar_real', :depth => 0).should be_instance_of(Array)
   end
-
+  
+  it "should unpack the archived files in the same folder as they where found" do
+    folder = Digest::MD5.hexdigest(Time.now.to_s)
+    %x{mkdir /tmp/#{folder} && mkdir /tmp/#{folder}/CD1 && mkdir /tmp/#{folder}/CD2}
+    src = File.expand_path(File.dirname(__FILE__) + "/data/o_files/test_package.rar")
+    ["/tmp/#{folder}/CD1", "/tmp/#{folder}/CD2"].each do |f|
+      FileUtils.copy_file(src, "#{f}/test_package.rar")
+    end
+    
+    Unpack.runner!("/tmp/#{folder}", :min_files => 0)
+    
+    %x{cd "/tmp/#{folder}" && ls}.split(/\n/).count.should be(2)
+  end
 end
 
 describe Unpack do

@@ -14,6 +14,7 @@ class Unpack
       :debugger               => false,
       :force_remove           => false,
       :remove                 => false,
+      :to                     => false,
       :absolute_path_to_unrar => "#{File.dirname(__FILE__)}/../bin/unrar"
     }
     
@@ -38,7 +39,7 @@ class Unpack
     args[:to] = args[:to].nil? ? File.dirname(args[:file]) : args[:to]
     
     # Adding the options that is being passed to {it!} directly to {Unpack}
-    this = self.new(:directory => args[:to], :options => {:min_files => 0}.merge(args))
+    this = self.new(:directory => args[:to], :options => {:min_files => 0, :to => true}.merge(args))
     
     # Is the file path absolute ? good, do nothing : get the absolute path
     file = args[:file].match(/^\//) ? args[:file] : File.expand_path(args[:file])
@@ -89,11 +90,12 @@ class Unpack
     @files.each  do |file|
       type = Mimer.identify(file)
       
-      # To what directory want we to unpack the file ? The same as the file : The one that where specified in {initialize}
-      path = @directory == File.dirname(file) ? File.dirname(file) : @directory
+      # Have the user specified a destenation folder to where the files are going to be unpacked?
+      # If so, use that, if not use the current location of the archive file
+      path = self.options[:to] ? @directory : File.dirname(file)
       
       before = Dir.new(path).entries
-
+      
       if type.zip?
         @removeable.merge!(path => {:file_type => 'zip'})
         self.unzip(:path => path, :file => file)
